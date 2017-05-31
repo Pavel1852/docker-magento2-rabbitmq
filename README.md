@@ -1,4 +1,4 @@
-# Magento2 (Varnish + PHP7 + Redis + SSL) cluster ready docker-compose infrastructure
+# Magento2 (Varnish + PHP7 + Redis + RabbitMQ + SSL) cluster ready docker-compose infrastructure
 
 ## Infrastructure overview
 * Container 1: MariaDB
@@ -8,6 +8,7 @@
 * Container 5: Varnish 4.1
 * Container 6: Redis (for autodiscovery cluster nodes)
 * Container 7: Nginx SSL terminator
+* Container 8: RabbitMQ
 
 ### Why a separate cron container?
 First of all containers should be (as far as possible) single process, but the most important thing is that (if someday we'll be able to deploy this infrastructure in production) we may need a cluster of apache+php containers but a single cron container running.
@@ -132,6 +133,13 @@ The cron container will check how many apache containers we have (broadcast/disc
 You can start your system with just one apache container, then scale it afterward, autodiscovery will reconfigure the load balancing on the fly.
 
 Also, the cron container (which updates Varnish's VCL) sets a "probe" to "/pub/media/styles.css" every 5 seconds, if 1 fails (container has been shut down) the container is considered sick.
+
+## RabbitMQ
+The Docker official RabbitMQ image is included.
+You can use _rabbitmqctl_ via _docker exec_, for instance to see the list of defined queues you just need to execute the following command:
+```
+docker exec -it dockermagento2_rabbitmq_1 rabbitmqctl list_queues
+```
 
 ## Tested on:
 * Docker for Mac 17
